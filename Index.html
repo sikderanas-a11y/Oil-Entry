@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oil Entry</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+:root{--accent:#2D6CB5;--accent2:#9C3F92;--brand:linear-gradient(135deg,#2D6CB5 0%,#7A4FA0 55%,#9C3F92 100%);--page:linear-gradient(180deg,#EAF6FF 0%,#F1F0FF 100%);--green:#12B76A;--green-l:#E3FBEF;--red:#E5342B;--red-l:#FDE8E7;--text:#10151C;--muted:#5B6B7D;--border:#D7DEE6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#EEF2F6;color:var(--text)}
+.app{max-width:none;width:100%;margin:0;min-height:100vh;background:var(--page);overflow-x:hidden}
+header{background:var(--brand);color:#fff;padding:16px 20px;border-bottom:3px solid var(--accent);position:sticky;top:0;z-index:50}
+header h1{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800}
+header .sub{font-size:12px;opacity:.85;margin-top:2px}
+main{padding:16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.title{font-size:15px;font-weight:700;margin-bottom:12px}
+.field{margin-bottom:14px;position:relative}
+label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:6px}
+input,select,textarea{width:100%;padding:13px;border:1.5px solid var(--border);border-radius:10px;font:inherit;font-size:16px;background:#fafafa}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);background:#fff}
+input[readonly]{background:#EEF2F6}
+.sug{position:absolute;left:0;right:0;top:100%;z-index:40;background:#fff;border:1.5px solid var(--border);border-radius:10px;margin-top:4px;max-height:300px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.sug div{padding:11px 14px;border-bottom:1px solid #eef1f5;cursor:pointer;overflow-wrap:anywhere}
+.sug div:last-child{border:none}.sug div:hover,.sug div.act{background:#EAF2FB}
+.sug b{display:block;font-size:15px}.sug small{color:var(--muted);font-size:12px}
+.sug .none{color:var(--red);cursor:default}
+.row{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #eef1f5;font-size:14px}
+.row:last-child{border:none}.row .l{color:var(--muted);font-weight:600}.row .v{font-weight:700;text-align:right;overflow-wrap:anywhere}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.purp{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.purp button{padding:12px 8px;border:1.5px solid var(--border);border-radius:10px;background:#fff;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.purp button.sel{background:var(--brand);color:#fff;border-color:transparent}
+.btn{width:100%;padding:15px;border:none;border-radius:12px;font:inherit;font-size:16px;font-weight:700;cursor:pointer;margin-top:6px}
+.btn-p{background:var(--brand);color:#fff}.btn-o{background:#fff;border:1.5px solid var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.err{background:var(--red-l);color:var(--red);padding:12px;border-radius:10px;font-size:14px;font-weight:600;margin-bottom:10px}
+.ok{text-align:center}.ok .chk{width:60px;height:60px;border-radius:50%;background:var(--green-l);color:var(--green);font-size:32px;line-height:60px;margin:0 auto 10px}
+.hidden{display:none}
+.oi{width:100%;border-collapse:collapse;font-size:13px}.oi th{text-align:left;color:var(--muted);font-weight:600;padding:6px 6px;border-bottom:1px solid var(--border)}
+.oi td{padding:9px 6px;border-bottom:1px solid #eef1f5;vertical-align:top;overflow-wrap:anywhere}.oi tr:last-child td{border:none}
+.oi .p{font-weight:700}.oi .na{color:var(--muted)}.oi .el{font-weight:700;color:var(--accent)}
+@media(max-width:520px){.oi thead{display:none}.oi,.oi tbody,.oi tr,.oi td{display:block;width:100%}
+.oi tr{padding:10px 0;border-bottom:1px solid #eef1f5}.oi tr:last-child{border:none}.oi td{border:none;padding:2px 0;display:flex;justify-content:space-between;gap:12px}
+.oi td::before{content:attr(data-l);color:var(--muted);font-weight:600;flex:none}.oi td.p{font-size:14px;display:block}.oi td.p::before{content:none}}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#F59E0B;margin-right:8px}
+.sec{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.orow{padding:12px 0;border-bottom:1px solid #eef1f5;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.orow .nm{font-size:14px;font-weight:700;flex:1 1 100%;overflow-wrap:anywhere}.orow .nm small{color:var(--muted);font-weight:600}
+.qb{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.qb button{min-width:46px;height:38px;padding:0 12px;border:1px solid var(--border);border-radius:8px;background:#F3F5F8;color:var(--muted);font:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.qb button.sel{background:#FFF4DF;border-color:#F59E0B;color:#D97706}
+.qb input{width:90px;padding:8px 10px;font-size:15px;border-radius:8px}
+@media(min-width:900px){main{padding:24px 32px}header{padding:18px 32px}
+#formBlock{display:grid;grid-template-columns:minmax(360px,1fr) minmax(0,1.5fr);gap:0 24px;align-items:start}
+#formBlock>.card:first-child{grid-column:1;grid-row:1}#vCard{grid-column:1;grid-row:2}#oilCard{grid-column:2;grid-row:1/span 2}
+#oRows{display:grid;grid-template-columns:1fr 1fr;gap:0 28px}
+}
+.c-search{background:linear-gradient(135deg,#DCEBFF 0%,#EDE4FF 100%);border-color:#B7CFF5;border-top:5px solid #2D6CB5}
+.c-veh{background:linear-gradient(135deg,#F1E6FF 0%,#FFE6F4 100%);border-color:#DDC3F2;border-top:5px solid #9C3F92}
+.c-oil{background:linear-gradient(135deg,#FFF3DC 0%,#FFE9E0 100%);border-color:#F6D49A;border-top:5px solid #F59E0B}
+.pn{border-radius:12px;padding:12px 14px;margin:12px 0;border:1px solid transparent}
+.p-recent{background:linear-gradient(135deg,#DDF8EA 0%,#D9F4F7 100%);border-color:#A9E4C7}.p-recent .title{color:#0E8F57}
+.p-int{background:linear-gradient(135deg,#FFEFD6 0%,#FFE0E6 100%);border-color:#F6C98F}.p-int .title{color:#C2410C}
+.c-search .title{color:#2D6CB5}.c-veh>.title{color:#7A2E86}.c-oil>.title{color:#B45309}
+.c-search input,.c-oil input,.c-oil textarea{background:#fff}
+@media(min-width:900px){#formBlock>.card:first-child{grid-column:1/-1!important;grid-row:1!important;justify-self:center;width:min(680px,100%)}
+#vCard{grid-row:2!important}#oilCard{grid-row:2!important}}
+.fp{border-radius:12px;padding:12px 14px;border:1px solid transparent;transition:transform .2s,box-shadow .2s}
+.fp:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(60,40,120,.12)}
+.fp label{color:#3b3b55}
+.fp-oil{background:linear-gradient(135deg,#E0ECFF 0%,#E6E3FF 100%);border-color:#B9C8F5}
+.fp-purpose{background:linear-gradient(135deg,#FFE3EC 0%,#FFD9F0 100%);border-color:#F5B4CF}.fp-purpose label{color:#B0245F}
+.fp-meter{background:linear-gradient(135deg,#DDF8EA 0%,#D7F3F6 100%);border-color:#A5E1C5}.fp-meter label{color:#0E8F57}
+.fp-dt{background:linear-gradient(135deg,#EDE4FF 0%,#E3E8FF 100%);border-color:#CDBDF2}.fp-dt label{color:#6D3FC0}
+.fp-rem{background:linear-gradient(135deg,#FFF6D6 0%,#FFEBD1 100%);border-color:#F2D58A}.fp-rem label{color:#A16207}
+.fp input,.fp textarea{background:#fff}.fp input[readonly]{background:rgba(255,255,255,.7)}
+.fp-oil .orow{border-color:rgba(100,110,200,.18)}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes flow{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+@keyframes pop{0%{transform:scale(.88)}60%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(122,79,160,.45)}50%{box-shadow:0 0 0 10px rgba(122,79,160,0)}}
+header{background-size:220% 220%;animation:flow 10s ease infinite}
+.card{animation:up .5s ease both;transition:transform .25s,box-shadow .25s}.card:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(70,50,140,.15)}
+.pn{animation:up .45s ease both}
+.btn-p{background-size:200% 200%;animation:flow 6s ease infinite;transition:transform .15s,box-shadow .2s}.btn-p:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 20px rgba(122,79,160,.4)}.btn-p:active{transform:scale(.98)}
+#saveBtn:not(:disabled){animation:flow 6s ease infinite,pulse 2.4s ease infinite}
+.qb button,.purp button{transition:transform .15s,background .2s,border-color .2s}.qb button:hover,.purp button:hover{transform:translateY(-2px)}
+.qb button.sel,.purp button.sel{animation:pop .3s ease}
+.purp button.sel{background:linear-gradient(135deg,#E5342B,#9C3F92)}
+.sug div{transition:background .15s,padding-left .15s}.sug div:hover{padding-left:20px}
+.ok .chk{animation:pop .6s ease}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.vbig{text-align:center;font-size:clamp(24px,4vw,34px);font-weight:800;font-family:"Barlow Condensed",Inter,sans-serif;letter-spacing:.02em;padding:14px 12px;margin:4px 0 10px;border:2.5px solid #9C3F92;border-radius:14px;background:rgba(255,255,255,.75);color:#4A1D5C;overflow-wrap:anywhere}
+.hidden{display:none!important}
+.modal{position:fixed;inset:0;z-index:100;background:rgba(20,16,50,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fade .25s ease}
+.modal .card{width:100%;max-width:460px;max-height:90vh;overflow-y:auto;margin:0;box-shadow:0 20px 50px rgba(0,0,0,.35);animation:pop .4s ease}
+.modal .card:hover{transform:none}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.hero{display:none}
+body.home header{display:none}
+body.home main{padding-top:0}
+body.home #formBlock{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding-bottom:8vh}
+body.home #formBlock>.card:first-child{width:min(680px,100%);background:transparent;border:none;box-shadow:none;padding:0;animation:none;transform:none}
+body.home .hero{display:block;text-align:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(64px,13vw,110px);line-height:1;margin-bottom:28px;background:linear-gradient(135deg,#2D6CB5,#7A4FA0 55%,#E5342B);-webkit-background-clip:text;background-clip:text;color:transparent;animation:up .6s ease both}
+body.home .c-search .title,body.home .c-search label{display:none}
+body.home #vSearch{padding:17px 26px;border-radius:999px;border:1.5px solid #cfd6e4;background:#fff;box-shadow:0 2px 10px rgba(60,60,120,.14);font-size:17px;transition:box-shadow .2s}
+body.home #vSearch:hover,body.home #vSearch:focus{box-shadow:0 4px 18px rgba(80,60,160,.25)}
+body.home #vStatus{text-align:center;margin-top:14px}
+body.home .sug{border-radius:20px;margin-top:8px}
+.oi{border:1.5px solid #E0A56B;border-radius:10px;overflow:hidden;background:rgba(255,255,255,.55)}
+.oi th{background:rgba(245,158,11,.18);color:#9A3412;border:1px solid #E0A56B}
+.oi td{border:1px solid #E8BE8E!important}
+.oi tbody tr:nth-child(even) td{background:rgba(255,255,255,.55)}
+.p-recent .row{border:1px solid #8FD3B0;border-radius:8px;padding:9px 12px;margin-bottom:6px;background:rgba(255,255,255,.55)}
+.p-recent .row:last-child{border:1px solid #8FD3B0}
+@media(max-width:520px){.oi tr{border:1.5px solid #E0A56B!important;border-radius:8px;padding:8px 10px;margin-bottom:8px;background:rgba(255,255,255,.55)}.oi td{border:none!important;background:none!important}}
+.sel-v{display:flex;justify-content:space-between;align-items:center;gap:8px}.sel-v a{color:var(--accent);font-size:13px;font-weight:600;cursor:pointer}
+</style></head><body class="home"><div class="app">
+<header><h1>🛢️ Oil Entry</h1><div class="sub">Oil consumption &amp; maintenance records</div></header>
+<main>
+<div id="entryView">
+ <div id="formBlock">
+  <div class="card c-search"><div class="hero">Oil Entry</div><div class="title">1. Vehicle Search</div>
+   <div class="field" id="vWrap"><label>Vehicle name or code (e.g. f12, ef12, dt6986, forklift)</label>
+    <input id="vSearch" autocomplete="off" placeholder="Start typing…" oninput="vInput(this,'vSug',pickVehicle)" onkeydown="kbd(event,'vSug')">
+    <div id="vSug" class="sug hidden"></div></div>
+   <div id="vStatus" style="font-size:13px;color:var(--muted)">Loading vehicles…</div>
+  </div>
+  <div id="vCard" class="card c-veh hidden"><div class="title sel-v">Selected Vehicle <a onclick="clearVehicle()">Change</a></div>
+   <div id="vName" class="vbig">-</div>
+   <div id="oiBox"></div></div>
+
+  <div id="oilCard" class="card c-oil hidden"><div class="title">2. Oil Entry</div>
+   <div class="sec"><span class="dot"></span>Oil Consumption</div>
+   <div style="font-size:13px;color:var(--muted);margin-bottom:6px">Select quantity for each oil type used. Leave at 0 if not used. Litres (grease in kg).</div>
+   <div id="oRows" class="fp fp-oil" style="margin-bottom:14px"></div>
+   <div class="field fp fp-purpose"><label>Purpose *</label><div class="purp" id="purp"></div></div>
+   <div class="field fp fp-meter"><label>Current Vehicle Meter Reading *</label><input id="meter" value="0" type="number" inputmode="decimal" min="0"></div>
+   <div class="field fp fp-dt"><label>Entry Date &amp; Time (automatic)</label><input id="dt" readonly></div>
+   <div class="field fp fp-rem"><label>Remarks (optional)</label><textarea id="remarks" rows="2" maxlength="500"></textarea></div>
+   <div id="err"></div>
+   <button class="btn btn-p" id="saveBtn" onclick="save()">Save Oil Entry</button>
+  </div>
+ </div>
+ <div id="okBlock" class="modal hidden"><div class="card ok pop"><div class="chk">✓</div><div class="title" style="font-size:18px">Oil Entry Saved</div>
+  <div id="okSum" style="text-align:left"></div>
+  <button class="btn btn-p" style="margin-top:16px" onclick="newEntry()">New Entry</button></div></div>
+</div>
+
+</main></div>
+<script>
+const SB_URL="https://oshqaazzteqqukilghev.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zaHFhYXp6dGVxcXVraWxnaGV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3Mzc4ODYsImV4cCI6MjEwMTMxMzg4Nn0.Rz33PdqBlq9yWqgNiz_4B_2fG6B3ztpk3dTx44He4F0";
+const sb=supabase.createClient(SB_URL,SB_KEY);
+const OILS=[["Engine Oil Delvac MX 15W-40 (CF -4/SG/CI-4)","Litre"],["Gear Oil HD 80W-90(GL-5)","Litre"],["Gear Oil HD 85W-140(GL-5)","Litre"],["Transmission Fluid ATF 220 SYN Tech (Dexron III)","Litre"],["Brake Fluid DOT 4","Litre"],["Hydraulic Oil DTE 24 Ultra (ISO VG 32)","Litre"],["Hydraulic Oil DTE 25 Ultra (ISO VG 46)","Litre"],["Hydraulic Oil DTE 26 Ultra (ISO VG 68)","Litre"],["Grease EP 2 (NLGI -2)","kg"],["Grease EP 3 (NLGI -3)","kg"],["Grease (Synthetic) Mobilith SHC 220","kg"],["Compressor Oil Rarus SHC 1025 (ISO VG 46)","Litre"],["Mobil Gear (Gear Oil)-600XP320","Litre"],["Coolant Extra Ready Mix","Litre"]];
+const PURPOSES=["Scheduled Maintenance","Loss Oil / Leakage","Breakdown / Emergency","Other"];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const GROUPS=OILS.map(o=>({n:o[0],t:[o[0]]}));
+let latestE=[],last={},oiState="idle",oiTok=0,vehicles=[],veh=null,purpose=null,busy=false,hOff=0,hT;
+const PAGE=20;
+
+/* ---------- vehicles ---------- */
+async function loadVehicles(){
+  try{let all=[],from=0;
+    for(;;){const{data,error}=await sb.from("master").select("code, vehicle_name").order("code").range(from,from+999);
+      if(error)throw error;all=all.concat(data||[]);if(!data||data.length<1000)break;from+=1000;}
+    vehicles=all.map(v=>{const name=String(v.vehicle_name||""),code=String(v.code||"");
+      const words=name.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+      const alpha=words.filter(w=>/[a-z]/.test(w));
+      return{...v,name,code,cn:norm(name),cc:norm(code),words,initials:alpha.map(w=>w[0]).join(""),
+        nums:(name+" "+code).match(/\d+/g)||[]};});
+    $("vStatus").textContent=vehicles.length?vehicles.length+" vehicles loaded":"No vehicles found in master table.";
+  }catch(e){$("vStatus").innerHTML='<span style="color:var(--red)">Could not load vehicles: '+esc(e.message||e)+' <a href="" onclick="loadVehicles();return false">Retry</a></span>';}
+}
+const norm=s=>String(s).toLowerCase().replace(/[^a-z0-9]/g,"");
+function score(v,q){
+  const n=norm(q);if(!n)return 0;let s=0;
+  if(v.cc===n||v.cn===n)return 100;
+  if(v.cn.startsWith(n)||v.cc.startsWith(n))s=Math.max(s,80);
+  if(v.cn.includes(n)||v.cc.includes(n))s=Math.max(s,60);
+  const m=n.match(/^([a-z]+)(\d+)$/),a=n.match(/^([a-z]+)$/);
+  if(m){const L=m[1],N=m[2];
+    const numExact=v.nums.some(x=>String(+x)===String(+N)),numPre=v.nums.some(x=>x.replace(/^0+/,"").startsWith(N.replace(/^0+/,"")));
+    const letters=v.initials.startsWith(L)||v.initials.endsWith(L)||v.words.some(w=>/[a-z]/.test(w)&&w.startsWith(L));
+    if(letters&&numExact)s=Math.max(s,90);else if(letters&&numPre)s=Math.max(s,70);
+  }else if(a){const L=a[1];
+    if(v.words.some(w=>w.startsWith(L)))s=Math.max(s,65);
+    if(v.initials.startsWith(L))s=Math.max(s,50);}
+  else if(/^\d+$/.test(n)&&v.nums.some(x=>x.includes(n)))s=Math.max(s,55);
+  return s;
+}
+function vMatches(q){return vehicles.map(v=>({v,s:score(v,q)})).filter(x=>x.s>0).sort((a,b)=>b.s-a.s||a.v.name.localeCompare(b.v.name,undefined,{numeric:true})).slice(0,10).map(x=>x.v);}
+function vInput(el,sugId,cb){
+  const box=$(sugId);if(sugId==="vSug"&&veh){veh=null;setHome();oiTok++;renderOI();$("vCard").classList.add("hidden");$("oilCard").classList.add("hidden");}
+  const q=el.value.trim();if(!q){box.classList.add("hidden");return;}
+  if(!vehicles.length){box.innerHTML='<div class="none">Vehicle list not loaded yet.</div>';box.classList.remove("hidden");return;}
+  const r=vMatches(q);
+  box.innerHTML=r.length?r.map((v,i)=>`<div data-i="${i}"><b>${esc(v.name)}</b><small>${esc(v.code)}</small></div>`).join(""):'<div class="none">No matching vehicle found.</div>';
+  box.classList.remove("hidden");
+  box.onclick=e=>{const d=e.target.closest("[data-i]");if(d)cb(r[+d.dataset.i]);};
+  box._r=r;box._cb=cb;
+}
+function setHome(){document.body.classList.toggle("home",!veh);}
+function pickVehicle(v){veh={code:v.code,vehicle_name:v.name};setHome();$("vSug").classList.add("hidden");$("vSearch").value=v.name;
+  $("vName").textContent=v.name;$("vCard").classList.remove("hidden");$("oilCard").classList.remove("hidden");tick();loadIntervals(v.code);}
+function clearVehicle(){veh=null;setHome();oiTok++;renderOI();$("vSearch").value="";$("vCard").classList.add("hidden");$("oilCard").classList.add("hidden");$("vSearch").focus();}
+function kbd(e,id){const b=$(id);if(e.key==="Escape"){b.classList.add("hidden");return;}
+  if(e.key==="Enter"){const a=b.querySelector(".act")||b.querySelector("[data-i]");if(a){e.preventDefault();a.click();}return;}
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();const it=[...b.querySelectorAll("[data-i]")];if(!it.length)return;
+    let i=it.findIndex(x=>x.classList.contains("act"));it.forEach(x=>x.classList.remove("act"));
+    i=e.key==="ArrowDown"?(i+1)%it.length:(i-1+it.length)%it.length;it[i].classList.add("act");it[i].scrollIntoView({block:"nearest"});}}
+
+/* ---------- consumption interval ---------- */
+const fmtDT=d=>new Date(d).toLocaleString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"numeric",minute:"2-digit",hour12:true}).replace(/\b(am|pm)\b/,m=>m.toUpperCase());
+const ts=s=>{let t=Date.parse(/[zZ]|[+-]\d\d(:?\d\d)?$/.test(s)?s:s+"Z");return isNaN(t)?null:t;};
+function elapsed(t){let m=Math.max(0,Math.floor((Date.now()-t)/60000));const d=Math.floor(m/1440),h=Math.floor(m%1440/60),mi=m%60;
+  const u=(n,w)=>n+" "+w+(n===1?"":"s");
+  if(d)return u(d,"day")+(h?" "+u(h,"hour"):"");if(h)return u(h,"hour")+(mi?" "+u(mi,"minute"):"");return u(mi,"minute");}
+async function loadIntervals(code){
+  const tok=++oiTok;oiState="loading";last={};latestE=[];renderOI();
+  try{
+    const res=await Promise.all(GROUPS.map(g=>sb.from("oil_entries").select("oil_type,quantity,unit,entry_datetime")
+      .eq("code",code).in("oil_type",g.t).gt("quantity",0).order("entry_datetime",{ascending:false}).limit(1)));
+    if(tok!==oiTok)return;
+    const bad=res.find(r=>r.error);if(bad)throw bad.error;
+    res.forEach((r,i)=>{if(r.data&&r.data[0])last[GROUPS[i].n]=r.data[0];});
+    const l1=await sb.from("oil_entries").select("entry_datetime").eq("code",code).gt("quantity",0).order("entry_datetime",{ascending:false}).limit(1);
+    if(l1.error)throw l1.error;
+    if(l1.data&&l1.data[0]){const l2=await sb.from("oil_entries").select("oil_type,quantity,unit,purpose,meter_reading,entry_datetime").eq("code",code).eq("entry_datetime",l1.data[0].entry_datetime).gt("quantity",0);
+      if(l2.error)throw l2.error;if(tok!==oiTok)return;latestE=l2.data||[];}
+    oiState="ok";
+  }catch(e){if(tok!==oiTok)return;oiState="err";}
+  renderOI();
+}
+function renderOI(){
+  const b=$("oiBox");if(!veh){b.innerHTML="";return;}
+  if(oiState==="loading"){b.innerHTML='<div class="na" style="font-size:13px">Loading…</div>';return;}
+  if(oiState==="err"){b.innerHTML='<div class="na" style="font-size:13px;color:var(--red)">Could not load consumption history. <a href="" onclick="loadIntervals(veh.code);return false">Retry</a></div>';return;}
+  let le="";
+  if(latestE.length){const t=ts(latestE[0].entry_datetime),order=o=>OILS.findIndex(x=>x[0]===o.oil_type);
+    le='<div class="title" style="margin:6px 0 6px;font-size:14px">Most Recent Entry</div><div class="row"><div class="l">Date &amp; Time</div><div class="v">'+(t!==null?esc(fmtDT(t))+' · <span class="el" style="color:var(--accent)" data-t="'+t+'">'+elapsed(t)+'</span> ago':"-")+'</div></div>'+
+     [...latestE].sort((a,b)=>order(a)-order(b)).map(r=>`<div class="row"><div class="l" style="overflow-wrap:anywhere">${esc(r.oil_type)}</div><div class="v" style="white-space:nowrap">${esc(r.quantity)} ${r.unit==="kg"?"kg":"L"}</div></div>`).join("")+
+     '<div class="row"><div class="l">Purpose</div><div class="v">'+esc(latestE[0].purpose||"-")+'</div></div><div class="row"><div class="l">Meter Reading</div><div class="v">'+(latestE[0].meter_reading!=null?esc(latestE[0].meter_reading):"-")+'</div></div>';}
+  else le='<div class="title" style="margin:6px 0 6px;font-size:14px">Most Recent Entry</div><div class="na" style="font-size:13px;margin-bottom:6px">No oil entries recorded for this vehicle.</div>';
+  b.innerHTML='<div class="pn p-recent">'+le+'</div><div class="pn p-int"><div class="title" style="margin:14px 0 6px;font-size:14px">Oil Consumption Interval</div>'+(Object.keys(last).length?'<table class="oi"><thead><tr><th>Oil Product</th><th>Last Consumption</th><th>Last Qty</th><th>Time Elapsed</th></tr></thead><tbody>'+
+   GROUPS.filter(g=>last[g.n]&&ts(last[g.n].entry_datetime)!==null).map(g=>{const r=last[g.n],t=ts(r.entry_datetime);
+    return`<tr><td class="p">${esc(g.n)}</td><td data-l="Last Consumption">${esc(fmtDT(t))}</td><td data-l="Last Qty">${esc(r.quantity)} ${r.unit==="kg"?"kg":"L"}</td><td data-l="Time Elapsed" class="el" data-t="${t}">${elapsed(t)}</td></tr>`;}).join("")+"</tbody></table>":'<div class="na" style="font-size:13px">No consumption recorded for this vehicle.</div>')+'</div>';
+}
+setInterval(()=>document.querySelectorAll("#oiBox [data-t]").forEach(e=>e.textContent=elapsed(+e.dataset.t)),30000);
+
+/* ---------- oil quantity rows ---------- */
+const QTY=OILS.map(()=>({v:0,other:false}));
+$("oRows").innerHTML=OILS.map((o,i)=>`<div class="orow"><div class="nm">${esc(o[0])} <small>(${o[1]==="kg"?"kg":"L"})</small></div>
+ <div class="qb" id="qb${i}">${[0,6,10].map(n=>`<button type="button" data-i="${i}" data-n="${n}"${n===0?' class="sel"':''}>${n}</button>`).join("")}
+ <button type="button" data-i="${i}" data-n="other">Other</button><input type="number" inputmode="decimal" min="0" step="0.01" class="hidden" id="oth${i}" placeholder="Qty"></div></div>`).join("");
+$("oRows").onclick=e=>{const b=e.target.closest("button");if(!b)return;const i=+b.dataset.i,n=b.dataset.n,q=QTY[i];
+  q.other=n==="other";q.v=q.other?(parseFloat($("oth"+i).value)||0):+n;
+  $("oth"+i).classList.toggle("hidden",!q.other);if(q.other)$("oth"+i).focus();
+  [...$("qb"+i).querySelectorAll("button")].forEach(x=>x.classList.toggle("sel",x===b));};
+$("oRows").oninput=e=>{const t=e.target;if(t.tagName!=="INPUT")return;QTY[+t.id.slice(3)].v=parseFloat(t.value)||0;};
+document.addEventListener("click",e=>{if(!e.target.closest("#vWrap"))$("vSug").classList.add("hidden");});
+function resetQty(){QTY.forEach((q,i)=>{q.v=0;q.other=false;$("oth"+i).value="";$("oth"+i).classList.add("hidden");
+  [...$("qb"+i).querySelectorAll("button")].forEach(x=>x.classList.toggle("sel",x.dataset.n==="0"));});}
+
+/* ---------- form ---------- */
+$("purp").innerHTML=PURPOSES.map(p=>`<button type="button" data-p="${esc(p)}">${esc(p)}</button>`).join("");
+$("purp").onclick=e=>{const b=e.target.closest("button");if(!b)return;purpose=b.dataset.p;[...$("purp").children].forEach(x=>x.classList.toggle("sel",x===b));};
+function tick(){const d=new Date();$("dt").value=fmtDT(d);}
+setInterval(()=>{if(veh)tick();},30000);
+function opName(){try{const o=JSON.parse(localStorage.getItem("operator")||"null");return o&&o.name?o.name:"";}catch(e){return"";}}
+function showErr(m){$("err").innerHTML='<div class="err">'+esc(m)+'</div>';}
+async function save(){
+  if(busy)return;$("err").innerHTML="";
+  const m=parseFloat($("meter").value);const op=opName()||null;
+  if(!veh)return showErr("Please select a valid vehicle from the suggestions.");
+  for(let i=0;i<OILS.length;i++)if(QTY[i].other&&!(QTY[i].v>0))return showErr("Enter a quantity greater than zero for: "+OILS[i][0]+" (or select 0).");
+  const used=OILS.map((o,i)=>({o,q:QTY[i].v})).filter(x=>x.q>0);
+  if(!used.length)return showErr("Please enter a quantity for at least one oil type.");
+  if(!purpose)return showErr("Please select a purpose.");
+  if(isNaN(m)||m<0)return showErr("Please enter a valid meter reading (0 or more).");
+  busy=true;const b=$("saveBtn");b.disabled=true;b.textContent="Saving…";
+  const now=new Date().toISOString(),rm=$("remarks").value.trim()||null;
+  const rows=used.map(x=>({code:veh.code,vehicle_name:veh.vehicle_name,oil_type:x.o[0],quantity:x.q,unit:x.o[1],purpose,meter_reading:m,remarks:rm,operator_name:op,entry_datetime:now}));
+  try{
+    const{data,error}=await sb.from("oil_entries").insert(rows).select();
+    if(error)throw error;
+    (data||[]).forEach(d=>{const g=GROUPS.find(x=>x.t.includes(d.oil_type));if(g&&Number(d.quantity)>0)last[g.n]=d;});latestE=data||[];renderOI();
+    const r=[["Vehicle",veh.vehicle_name+" ("+veh.code+")"],...(data||[]).map(d=>[d.oil_type,d.quantity+" "+d.unit]),["Meter Reading",m],["Purpose",purpose],["Entry Time",fmtDT(now)]];
+    if(rm)r.push(["Remarks",rm]);
+    $("okSum").innerHTML=r.map(x=>`<div class="row"><div class="l">${esc(x[0])}</div><div class="v">${esc(x[1])}</div></div>`).join("");
+    $("okBlock").classList.remove("hidden");
+  }catch(e){
+    let msg=e.message||String(e);
+    if(/relation .*oil_entries|does not exist|schema cache/i.test(msg))msg="Table oil_entries not found. Run oil-entry.sql in Supabase first.";
+    else if(/row-level security|permission/i.test(msg))msg="Save blocked by database security (RLS). Check the oil_entries insert policy.";
+    else if(/fetch|network/i.test(msg))msg="Network error. Your entry is still here — please try again.";
+    showErr("Save failed: "+msg);
+  }finally{busy=false;b.disabled=false;b.textContent="Save Oil Entry";}
+}
+function newEntry(){veh=null;setHome();resetQty();oiTok++;last={};latestE=[];renderOI();oil=null;purpose=null;$("vSearch").value="";$("meter").value="0";$("remarks").value="";
+  [...$("purp").children].forEach(x=>x.classList.remove("sel"));$("vCard").classList.add("hidden");$("oilCard").classList.add("hidden");$("err").innerHTML="";
+  $("okBlock").classList.add("hidden");$("formBlock").classList.remove("hidden");window.scrollTo(0,0);}
+
+loadVehicles();
+</script></body></html>
